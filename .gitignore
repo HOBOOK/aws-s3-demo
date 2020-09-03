@@ -32,3 +32,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Custom ignore ###
+src/main/resources/application.properties
