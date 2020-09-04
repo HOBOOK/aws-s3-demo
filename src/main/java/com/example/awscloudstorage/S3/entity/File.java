@@ -6,6 +6,9 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 @Data
 @Document(value="File")
 @NoArgsConstructor
@@ -15,4 +18,5 @@ public class File {
     private String title;
     private String filePath;
     private Long fileSize;
+    private Date lastModified;
 }

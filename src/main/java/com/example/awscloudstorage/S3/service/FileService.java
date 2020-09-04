@@ -8,9 +8,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class FileService {
     @Autowired
-    FileRepository fileRepository;
+    private FileRepository fileRepository;
 
     public void saveFile(File file){
         fileRepository.save(file);
+    }
+
+    public File getFile(String keyName){
+        return fileRepository.findByTitle(keyName);
+    }
+    public void deleteFile(File file){
+        fileRepository.delete(file);
     }
 }

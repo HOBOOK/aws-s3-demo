@@ -1,151 +1,116 @@
 <template>
   <v-container>
-    <v-row class="text-center">
-      <v-col cols="12">
-        <v-img
-          :src="require('../assets/logo.svg')"
-          class="my-3"
-          contain
-          height="200"
-        />
-      </v-col>
+    <v-container>
+      <v-file-input v-model="file" show-size multiple label="파일 업로드"></v-file-input>
+      <v-btn @click="upload" color="primary">S3에 파일 업로드</v-btn>
+    </v-container>
 
-      <v-col class="mb-4">
-        <h1 class="display-2 font-weight-bold mb-3">
-          Welcome to Vuetify
-        </h1>
+    <v-container>
 
-        <p class="subheading font-weight-regular">
-          For help and collaboration with other Vuetify developers,
-          <br>please join our online
-          <a
-            href="https://community.vuetifyjs.com"
-            target="_blank"
-          >Discord Community</a>
-        </p>
-      </v-col>
-
-      <v-col
-        class="mb-5"
-        cols="12"
+      <v-card>
+        <v-card-title>AWS S3 저장목록</v-card-title>
+      <v-data-table
+        :headers="headers"
+        :items="storage"
+        :page.sync="page"
+        :items-per-page="itemsPerPage"
+        :loading="loading"
+        hide-default-footer
+        class="elevation-1"
+        @page-count="pageCount = $event"
       >
-        <h2 class="headline font-weight-bold mb-3">
-          What's next?
-        </h2>
-
-        <v-row justify="center">
-          <a
-            v-for="(next, i) in whatsNext"
-            :key="i"
-            :href="next.href"
-            class="subheading mx-3"
-            target="_blank"
-          >
-            {{ next.text }}
-          </a>
-        </v-row>
-      </v-col>
-
-      <v-col
-        class="mb-5"
-        cols="12"
-      >
-        <h2 class="headline font-weight-bold mb-3">
-          Important Links
-        </h2>
-
-        <v-row justify="center">
-          <a
-            v-for="(link, i) in importantLinks"
-            :key="i"
-            :href="link.href"
-            class="subheading mx-3"
-            target="_blank"
-          >
-            {{ link.text }}
-          </a>
-        </v-row>
-      </v-col>
-
-      <v-col
-        class="mb-5"
-        cols="12"
-      >
-        <h2 class="headline font-weight-bold mb-3">
-          Ecosystem
-        </h2>
-
-        <v-row justify="center">
-          <a
-            v-for="(eco, i) in ecosystem"
-            :key="i"
-            :href="eco.href"
-            class="subheading mx-3"
-            target="_blank"
-          >
-            {{ eco.text }}
-          </a>
-        </v-row>
-      </v-col>
-    </v-row>
+      <template v-slot:item="row">
+        <tr>
+          <td>{{row.item.title}}</td>
+          <td>{{row.item.fileSize}}</td>
+          <td>{{row.item.lastModified}}</td>
+          <td>
+            <v-btn text small :href="'http://localhost:5000/file?title='+row.item.title">
+              다운로드
+            </v-btn>
+          </td>
+          <td>
+            <v-btn text small color="error" @click="deleteFile(row.item.title)">
+              삭제
+            </v-btn>
+          </td>
+        </tr>
+      </template>
+      </v-data-table>
+      <div class="text-center pt-2">
+        <v-pagination v-model="page" :length="pageCount"></v-pagination>
+      </div>
+      </v-card>
+    </v-container>
+    
   </v-container>
 </template>
 
 <script>
-  export default {
-    name: 'HelloWorld',
+import axios from 'axios'
 
-    data: () => ({
-      ecosystem: [
-        {
-          text: 'vuetify-loader',
-          href: 'https://github.com/vuetifyjs/vuetify-loader',
-        },
-        {
-          text: 'github',
-          href: 'https://github.com/vuetifyjs/vuetify',
-        },
-        {
-          text: 'awesome-vuetify',
-          href: 'https://github.com/vuetifyjs/awesome-vuetify',
-        },
-      ],
-      importantLinks: [
-        {
-          text: 'Documentation',
-          href: 'https://vuetifyjs.com',
-        },
-        {
-          text: 'Chat',
-          href: 'https://community.vuetifyjs.com',
-        },
-        {
-          text: 'Made with Vuetify',
-          href: 'https://madewithvuejs.com/vuetify',
-        },
-        {
-          text: 'Twitter',
-          href: 'https://twitter.com/vuetifyjs',
-        },
-        {
-          text: 'Articles',
-          href: 'https://medium.com/vuetify',
-        },
-      ],
-      whatsNext: [
-        {
-          text: 'Explore components',
-          href: 'https://vuetifyjs.com/components/api-explorer',
-        },
-        {
-          text: 'Select a layout',
-          href: 'https://vuetifyjs.com/getting-started/pre-made-layouts',
-        },
-        {
-          text: 'Frequently Asked Questions',
-          href: 'https://vuetifyjs.com/getting-started/frequently-asked-questions',
-        },
-      ],
-    }),
+  export default {
+    el: '#app',
+    data () {
+      return {
+        page: 1,
+        pageCount: 0,
+        itemsPerPage: 10,
+        headers: [
+          { text: '이름', align: 'start', sortable: true, value: 'title' },
+          { text: '크기', value: 'fileSize' },
+          { text: '수정날짜', value: 'lastModified' },
+          { text: '다운로드', value: ''},
+          { text: '삭제', value: ''},
+        ],
+        storage: [],
+        file: [],
+      }
+    },
+    mounted() {
+      axios.get("http://localhost:5000/")
+      .then((res) => {
+          this.storage = res.data
+      }).catch((e)=> {
+          console.log(e)
+      })
+    },
+    methods:{
+      async upload() {
+        var formData = new FormData();
+        formData.append('file', this.file[0])
+        await axios.post('http://localhost:5000/file',
+          formData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          }
+        ).then(function(){
+          console.log('successed');
+          location.reload();
+        }).catch(function(err){
+          console.log('failed -> ' + err );
+        });
+      },
+
+      deleteFile(key){
+        const params = {
+          title: key,
+        };
+        axios.delete('http://localhost:5000/file',
+          {
+            params
+          },
+        ).then(function(res){
+          console.log('successed -> ' + res);
+          location.reload();
+        }).catch(function(err){
+          console.log('failed -> ' + err);
+        });
+      }
+
+
+    }
   }
 </script>
