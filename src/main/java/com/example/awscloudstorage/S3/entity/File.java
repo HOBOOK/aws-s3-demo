@@ -14,10 +14,5 @@ public class File {
     private String id;
     private String title;
     private String filePath;
-
-    public File(String id, String title, String filePath){
-        this.id = id;
-        this.title = title;
-        this.filePath = filePath;
-    }
+    private Long fileSize;
 }

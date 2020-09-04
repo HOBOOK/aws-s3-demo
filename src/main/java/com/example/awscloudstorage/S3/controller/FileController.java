@@ -5,6 +5,7 @@ import com.example.awscloudstorage.S3.service.FileService;
 import com.example.awscloudstorage.S3.service.S3Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +21,8 @@ public class FileController {
     @Autowired private FileService fileService;
 
     @GetMapping
-    public String viewFile(){
+    public String viewFile(Model model){
+        model.addAttribute("s3Files", s3Service.readAll());
         return "index";
     }
 
@@ -31,7 +33,5 @@ public class FileController {
         fileService.saveFile(file);
         return "redirect:/file";
     }
-
-
 
 }
