@@ -37,5 +37,4 @@ out/
 src/main/resources/application.properties
 
 ### Docker ###
-Dockerfile
-docker-compose.yml
+/Docker/
