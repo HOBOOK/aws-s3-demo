@@ -8,8 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,6 +19,7 @@ import java.util.List;
  */
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*")
+
 public class FileController {
     @Autowired private S3Service s3Service;
     @Autowired private FileService fileService;
@@ -35,8 +34,15 @@ public class FileController {
     @PostMapping("/file")
     public ResponseEntity<File> createFile(@RequestParam(value="file", required=true)MultipartFile multipartFile) throws IOException{
         String path = s3Service.upload(multipartFile);
-        File file = new File();
-        file.setFilePath(path);
+        String key = multipartFile.getOriginalFilename();
+        File file;
+        if(fileService.getFile(key)!=null){
+            file = fileService.getFile(multipartFile.getOriginalFilename());
+        }else{
+            file = new File();
+            file.setTitle(key);
+            file.setFilePath(path);
+        }
         fileService.saveFile(file);
         return ResponseEntity.ok().body(file);
     }
@@ -54,9 +60,11 @@ public class FileController {
     // s3 Service의 파일 제거
     @DeleteMapping("/file")
     public void deleteFile(@RequestParam(value="title") final String key) throws AmazonServiceException{
-
         try{
             s3Service.delete(key);
+            if(fileService.getFile(key)!=null){
+                fileService.deleteFile(fileService.getFile(key));
+            }
 
         }catch (Exception e){
             e.printStackTrace();
