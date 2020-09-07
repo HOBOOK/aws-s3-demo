@@ -16,17 +16,22 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
+/*
+    AWS S3 서비스 API Endpoint
+ */
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class FileController {
     @Autowired private S3Service s3Service;
     @Autowired private FileService fileService;
 
+    // s3 Service의 파일 목록 전체 조회
     @GetMapping("/")
     public ResponseEntity<List<File>> readFile(){
         return ResponseEntity.ok().body(s3Service.readAll());
     }
 
+    // s3 Service의 파일 업로드
     @PostMapping("/file")
     public ResponseEntity<File> createFile(@RequestParam(value="file", required=true)MultipartFile multipartFile) throws IOException{
         String path = s3Service.upload(multipartFile);
@@ -36,6 +41,7 @@ public class FileController {
         return ResponseEntity.ok().body(file);
     }
 
+    // s3 Service의 파일 다운로드
     @GetMapping("/file")
     public ResponseEntity<ByteArrayResource> downloadFile(@RequestParam(value="title") final String key) throws IOException{
         byte[] data = s3Service.download(key);
@@ -45,6 +51,7 @@ public class FileController {
                 .body(byteArrayResource);
     }
 
+    // s3 Service의 파일 제거
     @DeleteMapping("/file")
     public void deleteFile(@RequestParam(value="title") final String key) throws AmazonServiceException{
 

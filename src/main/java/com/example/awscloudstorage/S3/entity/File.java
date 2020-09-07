@@ -9,6 +9,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 import java.util.Date;
 
+/*
+    파일 정보를 담은 엔티티
+ */
 @Data
 @Document(value="File")
 @NoArgsConstructor

@@ -47,6 +47,7 @@ public class S3Service {
                 .build();
     }
 
+    // AWS S3 스토리지에 업로드
     public String upload(MultipartFile multipartFile) throws IOException{
         String fileName = multipartFile.getOriginalFilename();
         s3Client.putObject(new PutObjectRequest(bucket, fileName, multipartFile.getInputStream(), null)
@@ -54,10 +55,12 @@ public class S3Service {
         return s3Client.getUrl(bucket, fileName).toString();
     }
 
+    // AWS S3 스토리지에서 키(파일이름)를 통해 파일 제거
     public void delete(String key) throws AmazonServiceException{
         s3Client.deleteObject(new DeleteObjectRequest(bucket, key));
     }
 
+    // AWS S3 스토리지에서 키(파일이름)를 통해 다운로드
     @Async
     public byte[] download(final String key) throws IOException{
         byte[] content = null;
@@ -68,7 +71,7 @@ public class S3Service {
         return content;
     }
 
-
+    // AWS S3 스토리지에 있는 파일 목록 불러오기
     public List<File> readAll(){
         List<com.example.awscloudstorage.S3.entity.File> s3Files = new ArrayList<>();
         ObjectListing objectListing = s3Client.listObjects(new ListObjectsRequest().withBucketName(bucket));
