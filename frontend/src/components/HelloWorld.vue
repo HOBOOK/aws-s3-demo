@@ -25,7 +25,7 @@
           <td>{{row.item.fileSize}}</td>
           <td>{{row.item.lastModified}}</td>
           <td>
-            <v-btn text small :href="'http://localhost:5000/file?title='+row.item.title">
+            <v-btn text small :href="'http://192.168.1.108:5000/file?title='+row.item.title">
               다운로드
             </v-btn>
           </td>
@@ -68,7 +68,7 @@ import axios from 'axios'
       }
     },
     mounted() {
-      axios.get("http://localhost:5000/")
+      axios.get("http://192.168.1.108:5000/")
       .then((res) => {
           this.storage = res.data
       }).catch((e)=> {
@@ -79,7 +79,7 @@ import axios from 'axios'
       async upload() {
         var formData = new FormData();
         formData.append('file', this.file[0])
-        await axios.post('http://localhost:5000/file',
+        await axios.post('http://192.168.1.108:5000/file',
           formData,
           {
             headers: {
@@ -98,7 +98,7 @@ import axios from 'axios'
         const params = {
           title: key,
         };
-        axios.delete('http://localhost:5000/file',
+        axios.delete('http://192.168.1.108:5000/file',
           {
             params
           },
